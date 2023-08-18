@@ -297,12 +297,15 @@ async def fill_excel(
         #                     sheet[f"{col_letter}{row_idx}"] = "X"
         # Llenar los otros campos del formulario
         # II. ...
-        # Guardar el archivo Excel modificado en un directorio temporal
+        #! Guardar el archivo Excel modificado en un directorio temporal
         temp_excel_file_path = os.path.join(module_directory, "hdv_temp.xlsx")
         workbook.save(temp_excel_file_path)
+        #!ending the response timer
         end_time = time.time()
+        #! calculate total response time
         processing_time = end_time - start_time
         print(processing_time)
+        #!Response as a binary file with the xlsx format
         return FileResponse(
             temp_excel_file_path,
             filename="hdv_template.xlsx",
@@ -310,9 +313,6 @@ async def fill_excel(
             headers={"Content-Disposition": "attachment; filename=myfile.xlsx"},
         )
 
-    # except asyncio.exceptions.TimeoutError:
-    #     error_response = RequestTimeoutResponse(detail="Request timed out")
-    #     return JSONResponse(content=error_response.dict(), status_code=503)
     except json.JSONDecodeError as json_error:
         print("JSON Decoding Error:", json_error)
         raise HTTPException(status_code=400, detail="Error serializando el JSON.")
