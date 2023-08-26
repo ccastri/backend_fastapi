@@ -7,7 +7,7 @@ router = APIRouter(prefix="/auth", tags=["create"])
 
 
 # Route for filling out the excel template with the user's inputs
-@router.post("/api/register", status_code=201)
+@router.post("/register", status_code=201)
 async def create_user_route(user_data: UserRegister):
     try:
         new_user = create_user(user_data)

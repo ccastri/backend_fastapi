@@ -35,7 +35,7 @@ import time
 from PIL import Image as PILImage
 
 #! Router config
-router = APIRouter(prefix="/api/hdv", tags=["add"])
+router = APIRouter(prefix="/hdv", tags=["add"])
 
 
 #! Pydantic JSON serialization (to python dict) modell
@@ -91,6 +91,24 @@ class Data(BaseModel):
 # copiaFactura: str = None
 # copiaIngresoAlmacen: str = None
 # copiaActaReciboSatisfaccion: str = None
+# Maximum allowed image size in bytes
+MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
+
+# Allowed image MIME types
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
+
+
+def is_allowed_image_type(content_type):
+    return content_type in ALLOWED_IMAGE_TYPES
+
+
+def is_valid_image(image_path):
+    try:
+        with PILImage.open(image_path) as img:
+            img.verify()
+            return True
+    except Exception as e:
+        return False
 
 
 #! Dependency for handling when request
@@ -162,6 +180,14 @@ async def fill_excel(
         # sheet["C18"] = form_data_dict["registroSanitario"]
         # sheet["C19"] = form_data_dict["ubicacion"]
         # sheet["C20"] = form_data_dict["proveedor"]
+        # Check image type
+        if not is_allowed_image_type(img.content_type):
+            raise HTTPException(status_code=400, detail="Invalid image type")
+
+        # Check image size
+        if img.file.seek(0, os.SEEK_END) > MAX_IMAGE_SIZE:
+            raise HTTPException(status_code=400, detail="Image size exceeds the limit")
+
         #! Image processing:
         #! create a temporal directory
         temp_dir = tempfile.mkdtemp()
@@ -173,11 +199,13 @@ async def fill_excel(
         with open(temp_image_path, "wb") as img_file:
             #! img writting by reading the incoming binaries
             img_file.write(img.file.read())
+        # Check image validity
+        if not is_valid_image(img):
+            raise HTTPException(status_code=400, detail="Invalid image format")
 
         #! Open and resize the image using PILLOW
         pil_image = PILImage.open(temp_image_path)
         pil_image.thumbnail((800, 800))  # Resize the image
-
         #! Save the compressed image back to the temporary path
         compressed_image_path = os.path.join(temp_dir, "compressed_image.jpg")
         #! Downsampling .85 in JPEG format

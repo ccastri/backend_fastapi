@@ -2,7 +2,8 @@ from fastapi import FastAPI, File, UploadFile, APIRouter, HTTPException
 import os
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/api/middleware", tags=["upload"])
+router = APIRouter(prefix="/middleware", tags=["upload"])
+
 
 @router.post("/upload_image")
 async def upload_image(img: UploadFile = File(...)):
