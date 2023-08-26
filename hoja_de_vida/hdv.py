@@ -320,6 +320,18 @@ async def fill_excel(
         error_message = f"Error al abrir el archivo de plantilla: {str(file_error)}"
         logging.error(error_message)
         raise HTTPException(status_code=500, detail=error_message)
+    except ValueError as value_error:
+        error_message = f"Error en los valores de entrada: {str(value_error)}"
+        logging.error(error_message)
+        raise HTTPException(status_code=400, detail=error_message)
+    except PermissionError as permission_error:
+        error_message = f"Error de permisos: {str(permission_error)}"
+        logging.error(error_message)
+        raise HTTPException(status_code=403, detail=error_message)
+    except IOError as io_error:
+        error_message = f"Error de entrada/salida: {str(io_error)}"
+        logging.error(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
     except Exception as e:
         # Handle other exceptions and provide a generic error message
         error_message = f"Error al procesar los datos: {str(e)}"
