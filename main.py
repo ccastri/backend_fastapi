@@ -47,14 +47,23 @@ def read_root():
 # at last, the bottom of the file/module
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="127.0.0.1", port=8000)
+{
+    "departamento": "scssd",
+    "municipio": "un valor",
+    "entidad": "un valor",
+    "correo": "un valor",
+    "direccion": "un valor",
+    "telefono": "un valor",
+}
 
-
-# {  "departamento": "scssd",
-#   "municipio": "un valor",
-#   "entidad": "un valor",
-#   "correo": "un valor",
-#   "direccion": "un valor",
-#   "telefono": "un valor",
+# {
+#     "departamento": "scssd",
+#     "municipio": "un valor",
+#     "entidad": "un valor",
+#     "correo": "un valor",
+#     "direccion": "un valor",
+#     "telefono": "un valor",
+# }
 #   "equipo": "un valor",
 #   "marca": "un valor",
 #   "modelo": "un valor",

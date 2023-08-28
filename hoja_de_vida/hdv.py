@@ -8,6 +8,7 @@ from fastapi import (
     Form,
     Depends,
 )
+import re
 
 #! JSON serialization error handling
 from fastapi.responses import JSONResponse
@@ -91,24 +92,24 @@ class Data(BaseModel):
 # copiaFactura: str = None
 # copiaIngresoAlmacen: str = None
 # copiaActaReciboSatisfaccion: str = None
-# Maximum allowed image size in bytes
-MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
+# # Maximum allowed image size in bytes
+# MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 
-# Allowed image MIME types
-ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
-
-
-def is_allowed_image_type(content_type):
-    return content_type in ALLOWED_IMAGE_TYPES
+# # Allowed image MIME types
+# ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png"}
 
 
-def is_valid_image(image_path):
-    try:
-        with PILImage.open(image_path) as img:
-            img.verify()
-            return True
-    except Exception as e:
-        return False
+# def is_allowed_image_type(content_type):
+#     return content_type in ALLOWED_IMAGE_TYPES
+
+
+# def is_valid_image(image_path):
+#     try:
+#         with PILImage.open(image_path) as img:
+#             img.verify()
+#             return True
+#     except Exception as e:
+# return False
 
 
 #! Dependency for handling when request
@@ -124,7 +125,7 @@ async def timeout_dependency(seconds: int = 10):
     "/fill_excel",
 )
 async def fill_excel(
-    data: str = File(...),
+    data: str = Form(...),
     img: UploadFile = File(...),
     timeout_dep: None = Depends(timeout_dependency),
 ):
@@ -132,7 +133,15 @@ async def fill_excel(
         #! Start response timer
         start_time = time.time()
         #! from JSON.stringify to JSON
-        json_data = json.loads(data)
+        # !Here I was trying to delete backslashes from the request
+        # input_string = data
+        # output_string = input_string.replace("\\'", "'")
+        input_string = data
+        regex_pattern = r"\\'"
+        output_string = re.sub(regex_pattern, "'", input_string)
+        # print(img)
+        print(output_string)
+        json_data = json.loads(output_string)
         # try:
         #! instanciating a new Data pydantic model with JSON props
         form_data_instance = Data(**json_data)
@@ -181,12 +190,12 @@ async def fill_excel(
         # sheet["C19"] = form_data_dict["ubicacion"]
         # sheet["C20"] = form_data_dict["proveedor"]
         # Check image type
-        if not is_allowed_image_type(img.content_type):
-            raise HTTPException(status_code=400, detail="Invalid image type")
+        # if not is_allowed_image_type(img.content_type):
+        #     raise HTTPException(status_code=400, detail="Invalid image type")
 
-        # Check image size
-        if img.file.seek(0, os.SEEK_END) > MAX_IMAGE_SIZE:
-            raise HTTPException(status_code=400, detail="Image size exceeds the limit")
+        # # Check image size
+        # if img.file.seek(0, os.SEEK_END) > MAX_IMAGE_SIZE:
+        #     raise HTTPException(status_code=400, detail="Image size exceeds the limit")
 
         #! Image processing:
         #! create a temporal directory
@@ -196,18 +205,22 @@ async def fill_excel(
         #! to be stored in the temp_dir in binary format
         temp_image_path = os.path.join(temp_dir, img.filename)
         # ! Open the img.bin
+        # async
         with open(temp_image_path, "wb") as img_file:
             #! img writting by reading the incoming binaries
+            # await
+
             img_file.write(img.file.read())
-        # Check image validity
-        if not is_valid_image(img):
-            raise HTTPException(status_code=400, detail="Invalid image format")
+        # # Check image validity
+        # if not is_valid_image(img):
+        #     raise HTTPException(status_code=400, detail="Invalid image format")
 
         #! Open and resize the image using PILLOW
         pil_image = PILImage.open(temp_image_path)
         pil_image.thumbnail((800, 800))  # Resize the image
         #! Save the compressed image back to the temporary path
         compressed_image_path = os.path.join(temp_dir, "compressed_image.jpg")
+        print(compressed_image_path)
         #! Downsampling .85 in JPEG format
         pil_image.save(
             compressed_image_path, format="JPEG", quality=85
@@ -220,7 +233,6 @@ async def fill_excel(
         img.height = 155  # Set the height of the image
         img_anchor = "H5"  # The top-left cell for the image
         sheet.add_image(img, img_anchor)
-
         # sheet["G13"] = form_data_dict["AdquisitionWay"]
         # form_data_dict["yearOfFabrication"] = datetime.strptime(
         # form_data_dict["yearOfFabrication"], "%Y-%m-%d"
