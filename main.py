@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-app = FastAPI(docs_url="/docs", openapi_url="/api/openapi.json", debug=True)
+app = FastAPI(docs_url="/docs", openapi_url="/api/openapi.json", debug=False)
 # encoded_url = os.environ.get("NEXT_PUBLIC_VERCEL_URL")
 # decoded_url = urllib.parse.unquote(encoded_url)
 
@@ -39,9 +39,14 @@ app.include_router(upload_image.router)
 app.include_router(users.router)
 
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
 @app.get("/hola")
 def read_root():
     return {"Hello": "World"}
+
 
 
 # at last, the bottom of the file/module
@@ -102,4 +107,4 @@ def read_root():
 #   "periodicidad": "un valor",
 #   "calibracion": "un valor"}
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app)
