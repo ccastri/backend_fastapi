@@ -5,13 +5,17 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from hoja_de_vida import hdv
 from middlewares import upload_image
+from auth import login
 import users
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 
+# from google_quickstart import Create_Service
 
 load_dotenv()
 app = FastAPI(docs_url="/docs", openapi_url="/api/openapi.json", debug=False)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 # encoded_url = os.environ.get("NEXT_PUBLIC_VERCEL_URL")
 # decoded_url = urllib.parse.unquote(encoded_url)
 
@@ -25,6 +29,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# ! Link it with google drive api
+# CLIENT_SECRET_FILE = "credentials_oauth.json"
+# API_NAME = "drive"
+# API_VERSION = "v3"
+# SCOPES = ["https://www.googleapis.com/auth/drive"]
+
+# service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
+# print(dir(service))
 
 
 # Trial fastapi model
@@ -37,29 +49,30 @@ class Item(BaseModel):
 app.include_router(hdv.router)
 app.include_router(upload_image.router)
 app.include_router(users.router)
+app.include_router(login.router)
 
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
+
 @app.get("/hola")
 def read_root():
     return {"Hello": "World"}
 
 
-
 # at last, the bottom of the file/module
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="127.0.0.1", port=8000)
-{
-    "departamento": "scssd",
-    "municipio": "un valor",
-    "entidad": "un valor",
-    "correo": "un valor",
-    "direccion": "un valor",
-    "telefono": "un valor",
-}
+# {
+#     "departamento": "scssd",
+#     "municipio": "un valor",
+#     "entidad": "un valor",
+#     "correo": "un valor",
+#     "direccion": "un valor",
+#     "telefono": "un valor",
+# }
 
 # {
 #     "departamento": "scssd",
