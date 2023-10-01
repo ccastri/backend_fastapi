@@ -7,8 +7,13 @@ class UserRegister(BaseModel):
     nit: str
     city: str
     department: str
-    email: str
+    username: str
     password: str
     password_confirm: str
     role: str
     tos: bool
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str

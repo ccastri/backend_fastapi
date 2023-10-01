@@ -5,8 +5,6 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from hoja_de_vida import hdv
 from middlewares import upload_image
-
-# from auth import login
 import users
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -16,7 +14,6 @@ from fastapi.staticfiles import StaticFiles
 
 load_dotenv()
 app = FastAPI(docs_url="/docs", openapi_url="/api/openapi.json", debug=False)
-app.mount("/static", StaticFiles(directory="static"), name="static")
 # encoded_url = os.environ.get("NEXT_PUBLIC_VERCEL_URL")
 # decoded_url = urllib.parse.unquote(encoded_url)
 
@@ -50,7 +47,6 @@ class Item(BaseModel):
 app.include_router(hdv.router)
 app.include_router(upload_image.router)
 app.include_router(users.router)
-# app.include_router(login.router)
 
 
 @app.get("/")
