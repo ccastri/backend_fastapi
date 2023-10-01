@@ -121,6 +121,7 @@ async def timeout_dependency(seconds: int = 10):
         raise HTTPException(status_code=503, detail="Request timed out")
 
 
+# router.mount("/static", StaticFiles(directory="static"), name="static")
 @router.post(
     "/fill_excel",
 )
@@ -165,9 +166,11 @@ async def fill_excel(
         # print(data.img)
         #! Creating a temp file:
         #!1. Store current file path
-        module_directory = os.path.dirname(__file__)
+        module_directory = os.path.dirname(os.path.abspath(__file__))
         #!2. Name the temporal file and add it to the current directory path
-        excel_template_path = os.path.join(module_directory, "hdv_template.xlsx")
+        excel_template_path = os.path.join(
+            module_directory, "..", "static", "hdv_template.xlsx"
+        )
         #!3. Cargar el archivo Excel hoja_De_vida.xlsx
         workbook = load_workbook(excel_template_path)
         sheet = workbook.active
@@ -338,7 +341,9 @@ async def fill_excel(
         # Llenar los otros campos del formulario
         # II. ...
         #! Guardar el archivo Excel modificado en un directorio temporal
-        temp_excel_file_path = os.path.join(module_directory, "hdv_temp.xlsx")
+        temp_excel_file_path = os.path.join(
+            module_directory, "..", "static", "hdv_temp.xlsx"
+        )
         workbook.save(temp_excel_file_path)
         #!ending the response timer
         end_time = time.time()
